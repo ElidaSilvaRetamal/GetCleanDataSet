@@ -6,7 +6,8 @@ library(Hmisc)
 library(plyr)
 library(tidyverse)
 library(data.table)
-
+library(knitr)
+library(kableExtra)
 #=======================================================================================
 ### Step 0. Getting, downloading, unzipping  and reading dataset
     
@@ -99,10 +100,9 @@ names(data_tidy)
 # gravity: Gravity
 # mean: Mean 
 
-names(data_tidy) <- gsub("Freq","Frequency",names(data_tidy), ignore.case = TRUE)
-names(data_tidy) <- gsub("^t","Time",names(data_tidy))
-names(data_tidy) <- sub(".tB","TimeB",names(data_tidy), ignore.case = FALSE)
-names(data_tidy) <- gsub("^f","Frequency",names(data_tidy))
+names(data_tidy) <- gsub(("Freq|^f"),"Frequency",names(data_tidy), ignore.case = TRUE)
+names(data_tidy) <- gsub(("^t"),"Time",names(data_tidy))
+names(data_tidy) <- gsub("tBody","TimeBody",names(data_tidy), ignore.case = TRUE)
 names(data_tidy) <- gsub("Acc","Accelerometer",names(data_tidy))
 names(data_tidy) <- gsub("Mag","Magnitude",names(data_tidy))
 names(data_tidy) <- gsub("gravity","Gravity",names(data_tidy))
@@ -112,23 +112,25 @@ names(data_tidy) <- gsub("mean", "Mean", names(data_tidy))
 
 # 4.3  data_tidy with descriptive names
 names(data_tidy)
+dim(data_tidy)
 
 #=============================================================================================
 # Step 5. From the data set in step 4, creates a second, independent tidy data set with the 
 # average of each variable for each activity and each subject.
 
+#### Step 5.1 Creating the second dataset:
 second_data <- data_tidy %>%
     group_by(subject, activity) %>%
     summarise_all(funs(mean))
 
-head(second_data)
-names(second_data)
-view(second_data)
+#### Step 5.2 Writing a table for the second data set.
 
 write.table(second_data, file = "Exported_data.txt", row.names = FALSE)
 
-
-##### Data Set Exported
+#### Step 5.3 Exporting the second data set.
 
 exported <- read.table("Exported_data.txt")
 
+#### Taking a look at the second data set.
+
+kable(head(second_data, 5), align = "c", booktabs = TRUE)
